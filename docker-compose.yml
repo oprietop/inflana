@@ -1,0 +1,34 @@
+version: '2.1'
+services:
+  nginx:
+    image: smashwilson/lets-nginx
+    restart: always
+    environment:
+      TZ: /usr/share/zoneinfo/Europe/Madrid
+      DOMAIN: $DOMAIN
+      EMAIL: $EMAIL
+      UPSTREAM: grafana:3000
+    ports:
+      - 80:80
+      - 443:443
+    volumes:
+      - ./nginx/tuning/limits.conf:/etc/security/limits.conf
+      - ./nginx/tuning/sysctl.conf:/etc/sysctl.conf
+      - ./nginx/letsencrypt:/etc/letsencrypt
+      - ./nginx/ssl:/etc/ssl
+      - ./nginx/templates:/templates
+      - ./nginx/htpasswd:/etc/nginx/htpasswd
+      - ./nginx/www:/usr/share/nginx/html
+  grafana:
+    image: grafana/grafana
+    restart: always
+    volumes:
+     - ./grafana/grafana.db:/var/lib/grafana/grafana.db
+     - ./grafana/grafana.ini:/etc/grafana/grafana.ini
+  influxdb:
+    image: influxdb:alpine
+    restart: always
+    volumes:
+      - ./influxdb:/var/lib/influxdb
+    ports:
+      - 8086:8086
