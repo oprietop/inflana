@@ -5,26 +5,26 @@ services:
     restart: always
     environment:
       TZ: /usr/share/zoneinfo/Europe/Madrid
-      DOMAIN: $DOMAIN
       EMAIL: $EMAIL
+      DOMAIN: $DOMAIN
       UPSTREAM: grafana:3000
     ports:
       - 80:80
       - 443:443
     volumes:
-      - ./nginx/tuning/limits.conf:/etc/security/limits.conf
-      - ./nginx/tuning/sysctl.conf:/etc/sysctl.conf
+      - ./nginx/tuning/limits.conf:/etc/security/limits.conf:ro
+      - ./nginx/tuning/sysctl.conf:/etc/sysctl.conf:ro
       - ./nginx/letsencrypt:/etc/letsencrypt
       - ./nginx/ssl:/etc/ssl
       - ./nginx/templates:/templates
-      - ./nginx/htpasswd:/etc/nginx/htpasswd
+      - ./nginx/htpasswd:/etc/nginx/htpasswd:ro
       - ./nginx/www:/usr/share/nginx/html
   grafana:
     image: grafana/grafana
     restart: always
     volumes:
-     - ./grafana/grafana.db:/var/lib/grafana/grafana.db
-     - ./grafana/grafana.ini:/etc/grafana/grafana.ini
+      - ./grafana/grafana.db:/var/lib/grafana/grafana.db
+      - ./grafana/grafana.ini:/etc/grafana/grafana.ini
   influxdb:
     image: influxdb:alpine
     restart: always
@@ -32,3 +32,17 @@ services:
       - ./influxdb:/var/lib/influxdb
     ports:
       - 8086:8086
+  telegraf:
+    image: telegraf:alpine
+    restart: always
+    hostname: host
+    environment:
+      HOST_PROC: /rootfs/proc
+      HOST_SYS: /rootfs/sys
+      HOST_ETC: /rootfs/etc
+    volumes:
+      - ./telegraf/telegraf.conf:/etc/telegraf/telegraf.conf:ro
+      - /:/rootfs
+      - /var/run/utmp:/var/run/utmp:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+
