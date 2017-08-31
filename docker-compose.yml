@@ -30,8 +30,6 @@ services:
     restart: always
     volumes:
       - ./influxdb:/var/lib/influxdb
-    ports:
-      - 8086:8086
   telegraf:
     image: telegraf:alpine
     restart: always
